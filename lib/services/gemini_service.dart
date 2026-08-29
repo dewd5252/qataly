@@ -12,17 +12,24 @@ class GeminiService {
 
   // Groq LPU Provider Details
   static const String _groqApiKey =
-      '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';
-  static const String _groqModel = 'llama-3.3-70b-versatile';
+      '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';
+  static const List<String> _groqModels = [
+    'openai/gpt-oss-120b',
+    'qwen/qwen3.6-27b',
+    'groq/compound',
+  ];
   static const String _groqUrl =
       'https://api.groq.com/openai/v1/chat/completions';
 
-  // Gemini 3.5 Flash Provider Details
+  // Google AI Studio Gemini Provider Details (gemini-2.5-flash-lite and gemini-3.6-flash ONLY)
   static const String _geminiApiKey =
-      'AQ.Ab8RN6KXF_tEy3bOS8Ej6mZDed2ILMwSnCpU2ObFWv_io3gDMQ';
-  static const String _geminiModel = 'gemini-3.5-flash';
-  static const String _geminiUrl =
-      'https://generativelanguage.googleapis.com/v1beta/models/$_geminiModel:generateContent';
+      'AIzaSyCwi0GzVmyyk5Le3RIElIoCVHBH_z3HSJ4';
+  static const List<String> _geminiModels = [
+    'gemini-2.5-flash-lite',
+    'gemini-3.6-flash',
+  ];
+  static const String _geminiBaseUrl =
+      'https://generativelanguage.googleapis.com/v1beta/models';
 
   final Random _random = Random();
   int _providerCounter = 0;
@@ -50,20 +57,20 @@ class GeminiService {
       try {
         return await _generateGroq(prompt, jsonMode: jsonMode);
       } catch (e) {
-        debugPrint('Groq LPU failed ($e), falling back to Gemini 3.5 Flash...');
+        debugPrint('Groq LPU failed ($e), falling back to Gemini models...');
         return await _generateGemini(prompt, jsonMode: jsonMode);
       }
     } else {
       try {
         return await _generateGemini(prompt, jsonMode: jsonMode);
       } catch (e) {
-        debugPrint('Gemini 3.5 Flash failed ($e), falling back to Groq LPU...');
+        debugPrint('Gemini models failed ($e), falling back to Groq LPU...');
         return await _generateGroq(prompt, jsonMode: jsonMode);
       }
     }
   }
 
-  /// 1. Groq LPU Generator
+  /// 1. Groq LPU Generator with internal model fallback
   Future<String> _generateGroq(String prompt, {bool jsonMode = false}) async {
     final uri = Uri.parse(_groqUrl);
     final headers = {
@@ -71,39 +78,47 @@ class GeminiService {
       'Authorization': 'Bearer $_groqApiKey',
     };
 
-    final Map<String, dynamic> bodyMap = {
-      'model': _groqModel,
-      'messages': [
-        {'role': 'user', 'content': prompt}
-      ],
-      'temperature': 0.7,
-      'max_tokens': 3072,
-    };
+    dynamic lastError;
+    for (final model in _groqModels) {
+      try {
+        final Map<String, dynamic> bodyMap = {
+          'model': model,
+          'messages': [
+            {'role': 'user', 'content': prompt}
+          ],
+          'temperature': 0.7,
+          'max_tokens': 3072,
+        };
 
-    if (jsonMode) {
-      bodyMap['response_format'] = {'type': 'json_object'};
+        if (jsonMode) {
+          bodyMap['response_format'] = {'type': 'json_object'};
+        }
+
+        final response = await http
+            .post(uri, headers: headers, body: jsonEncode(bodyMap))
+            .timeout(const Duration(seconds: 20));
+
+        if (response.statusCode != 200) {
+          throw Exception('Groq API [$model] Error ${response.statusCode}: ${response.body}');
+        }
+
+        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        final choices = json['choices'] as List<dynamic>?;
+        if (choices == null || choices.isEmpty) {
+          throw Exception('لا توجد استجابة من Groq LPU ($model)');
+        }
+        final message = choices[0]['message'] as Map<String, dynamic>;
+        return (message['content'] as String).trim();
+      } catch (e) {
+        lastError = e;
+        debugPrint('Groq model $model failed, trying next...');
+      }
     }
-
-    final response = await http
-        .post(uri, headers: headers, body: jsonEncode(bodyMap))
-        .timeout(const Duration(seconds: 20));
-
-    if (response.statusCode != 200) {
-      throw Exception('Groq API Error ${response.statusCode}: ${response.body}');
-    }
-
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    final choices = json['choices'] as List<dynamic>?;
-    if (choices == null || choices.isEmpty) {
-      throw Exception('لا توجد استجابة من Groq LPU');
-    }
-    final message = choices[0]['message'] as Map<String, dynamic>;
-    return (message['content'] as String).trim();
+    throw Exception('All Groq models failed. Last error: $lastError');
   }
 
-  /// 2. Gemini 3.5 Flash Generator
+  /// 2. Gemini Generator with dynamic fallback between gemini-2.5-flash-lite and gemini-3.6-flash ONLY
   Future<String> _generateGemini(String prompt, {bool jsonMode = false}) async {
-    final uri = Uri.parse('$_geminiUrl?key=$_geminiApiKey');
     final Map<String, dynamic> genConfig = {
       'temperature': 0.7,
       'maxOutputTokens': 3072,
@@ -124,22 +139,32 @@ class GeminiService {
       'generationConfig': genConfig
     });
 
-    final response = await http
-        .post(uri, headers: {'Content-Type': 'application/json'}, body: body)
-        .timeout(const Duration(seconds: 25));
+    dynamic lastError;
+    for (final model in _geminiModels) {
+      try {
+        final uri = Uri.parse('$_geminiBaseUrl/$model:generateContent?key=$_geminiApiKey');
+        final response = await http
+            .post(uri, headers: {'Content-Type': 'application/json'}, body: body)
+            .timeout(const Duration(seconds: 25));
 
-    if (response.statusCode != 200) {
-      throw Exception('Gemini API Error ${response.statusCode}: ${response.body}');
-    }
+        if (response.statusCode != 200) {
+          throw Exception('Gemini API [$model] Error ${response.statusCode}: ${response.body}');
+        }
 
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    final candidates = json['candidates'] as List<dynamic>?;
-    if (candidates == null || candidates.isEmpty) {
-      throw Exception('لا توجد استجابة من Gemini 3.5 Flash');
+        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        final candidates = json['candidates'] as List<dynamic>?;
+        if (candidates == null || candidates.isEmpty) {
+          throw Exception('لا توجد استجابة من Gemini ($model)');
+        }
+        final content = candidates[0]['content'] as Map<String, dynamic>;
+        final parts = content['parts'] as List<dynamic>;
+        return (parts[0]['text'] as String).trim();
+      } catch (e) {
+        lastError = e;
+        debugPrint('Gemini model $model failed, trying fallback model...');
+      }
     }
-    final content = candidates[0]['content'] as Map<String, dynamic>;
-    final parts = content['parts'] as List<dynamic>;
-    return (parts[0]['text'] as String).trim();
+    throw Exception('All Gemini models failed. Last error: $lastError');
   }
 
   // ─────────────────────────────────────────────────────────────
