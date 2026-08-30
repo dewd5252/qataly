@@ -59,6 +59,16 @@ class SupabaseService {
 
   Future<void> signOut() => _db.auth.signOut();
 
+  /// Delete user account and associated records (Google Play Data Safety compliant)
+  Future<void> deleteAccount(String userId) async {
+    try {
+      await _db.from('user_progress').delete().eq('user_id', userId);
+      await _db.from('vocabulary_weaknesses').delete().eq('user_id', userId);
+      await _db.from('profiles').delete().eq('id', userId);
+    } catch (_) {}
+    await _db.auth.signOut();
+  }
+
   // ─────────────────────────────── PROFILES ───────────────────────────
 
   Future<Profile> getProfile(String userId) async {

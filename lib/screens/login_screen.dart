@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:qataly/state/auth_provider.dart';
 import 'package:qataly/services/telegram_auth_service.dart';
 import 'package:qataly/screens/student_dashboard.dart';
+import 'package:qataly/screens/legal_screen.dart';
 import 'package:qataly/theme.dart';
 
 const String kTelegramBotUsername = 'QatalyBot';
@@ -361,6 +362,61 @@ class _LoginScreenState extends State<LoginScreen>
               else
                 _TelegramLoginButton(onPressed: _startTelegramLogin),
 
+              const SizedBox(height: 16),
+              Center(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    const Text(
+                      'بتسجيل دخولك فإنك توافق على ',
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LegalScreen(initialTabIndex: 1),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'شروط الاستخدام',
+                        style: TextStyle(
+                          color: Color(0xFF38BDF8),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                    const Text(
+                      ' و ',
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LegalScreen(initialTabIndex: 0),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'سياسة الخصوصية',
+                        style: TextStyle(
+                          color: Color(0xFF38BDF8),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
               const Center(
                 child: Text(

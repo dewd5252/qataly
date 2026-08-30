@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طلب حذف الحساب والبيانات — تطبيق قطعه (Qata'ly)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0E27;
+      --card-bg: #131B3E;
+      --card-border: #2A3875;
+      --accent-red: #EF4444;
+      --accent-blue: #229ED9;
+      --accent-cyan: #38BDF8;
+      --text-main: #FFFFFF;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Cairo', 'Inter', -apple-system, sans-serif;
+      line-height: 1.8;
+      padding: 0 16px 60px;
+    }
+    header {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 0 24px;
+      text-align: center;
+      border-bottom: 2px solid var(--card-border);
+    }
+    .logo {
+      font-size: 38px;
+      font-weight: 900;
+      color: #fff;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .tagline {
+      color: var(--accent-cyan);
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      background: var(--card-bg);
+      transition: all 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: #fff;
+      border-color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.15);
+    }
+    main {
+      max-width: 860px;
+      margin: 32px auto 0;
+    }
+    .meta-badge {
+      display: inline-block;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 800;
+      margin: 36px 0 14px;
+      color: var(--accent-cyan);
+      border-right: 4px solid var(--accent-red);
+      padding-right: 12px;
+    }
+    p, li {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 14px;
+    }
+    ul, ol {
+      padding-right: 24px;
+      margin-bottom: 16px;
+    }
+    li { margin-bottom: 8px; }
+    .card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+    .alert-danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid var(--accent-red);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    .alert-danger h3 {
+      color: #F87171;
+      font-size: 17px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .step-box {
+      background: #0D1430;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+    }
+    .step-number {
+      background: var(--accent-blue);
+      color: #fff;
+      font-weight: 900;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+      text-align: right;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 700;
+      color: #fff;
+      font-size: 14px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: #0A0E27;
+      border: 1.5px solid var(--card-border);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+    }
+    .submit-btn {
+      background: var(--accent-red);
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 900;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .submit-btn:hover {
+      background: #DC2626;
+    }
+    footer {
+      max-width: 860px;
+      margin: 50px auto 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--card-border);
+      padding-top: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">قَطْعَلِي ⚡ (Qata'ly)</div>
+    <div class="tagline">طلب وإجراءات حذف الحساب والبيانات — متوافق مع معايير Google Play</div>
+    <nav class="nav-links">
+      <a href="index.html">الرئيسية</a>
+      <a href="privacy.html">سياسة الخصوصية</a>
+      <a href="terms.html">شروط الاستخدام</a>
+      <a href="delete-account.html" class="active">حذف الحساب والبيانات</a>
+      <a href="licenses.html">التراخيص المفتوحة</a>
+    </nav>
+  </header>
+
+  <main>
+    <span class="meta-badge">سياسة أمان البيانات وحذف الحسابات (Google Play Data Safety)</span>
+    <h1>حذف الحساب والبيانات الشخصية</h1>
+
+    <p>
+      احتراماً لخصوصيتك وحقك في التحكم الكامل ببياناتك (Right to Erasure)، يتيح تطبيق <strong>«قطعه» (Qata'ly)</strong> للمستخدمين إمكانية حذف حساباتهم وجميع البيانات المرتبطة بها في أي وقت وبكل سهولة.
+    </p>
+
+    <div class="alert-danger">
+      <h3>⚠️ تنبيه هام قبل الحذف:</h3>
+      <p style="color: #FECACA; margin: 0;">
+        عملية حذف الحساب نهائية ولا يمكن التراجع عنها. سيتم حذف تقييمك (MMR)، وسجل حلول القطع، وقاموس الكلمات الصعبة، والتتابع اليومي (Streak)، ولن تتمكن من استعادة هذا التقدم لاحقاً.
+      </p>
+    </div>
+
+    <h2>أولاً: حذف الحساب مباشرة من داخل التطبيق (In-App Deletion)</h2>
+    <p>إذا كان التطبيق مثبتاً على هاتفك، يمكنك تنفيذ الحذف الفوري بخطوات بسيطة:</p>
+    
+    <div class="step-box">
+      <p style="color: #fff; margin: 0;"><span class="step-number">1</span> افتح تطبيق <strong>قطعه</strong> على هاتفك وسجل الدخول.</p>
+    </div>
+    <div class="step-box">
+      <p style="color: #fff; margin: 0;"><span class="step-number">2</span> انتقل إلى تبويب <strong>الملف الشخصي (👤)</strong> من القائمة السفلية.</p>
+    </div>
+    <div class="step-box">
+      <p style="color: #fff; margin: 0;"><span class="step-number">3</span> اضغط على خيار <strong>«الشروط والخصوصية وحذف الحساب»</strong>.</p>
+    </div>
+    <div class="step-box">
+      <p style="color: #fff; margin: 0;"><span class="step-number">4</span> اختر تبويب <strong>«حذف الحساب»</strong> واضغط على زر <strong>«تأكيد حذف حسابي نهائياً 🗑️»</strong>.</p>
+    </div>
+    <p style="color: var(--accent-cyan);">⚡ سيتم مسح بياناتك من خوادم قاعدة البيانات فوراً وتسجيل خروجك في نفس اللحظة.</p>
+
+    <h2>ثانياً: طلب الحذف عبر الويب (إذا حذفت التطبيق)</h2>
+    <p>إذا قمت بإلغاء تثبيت التطبيق وترغب في حذف بياناتك من خوادمنا، يرجى إرسال طلب الحذف عبر النموذج التالي أو مراسلتنا بالبريد الإلكتروني:</p>
+
+    <div class="card">
+      <form action="mailto:support@qataly.app?subject=Account%20Deletion%20Request%20-%20Qataly" method="POST" enctype="text/plain">
+        <div class="form-group">
+          <label>معرف التيليجرام (Telegram ID أو Username):</label>
+          <input type="text" name="Telegram_ID" placeholder="مثال: @username أو رقم الحساب" required>
+        </div>
+
+        <div class="form-group">
+          <label>البريد الإلكتروني للتأكيد والتواصل:</label>
+          <input type="email" name="Contact_Email" placeholder="your-email@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label>سبب الحذف (اختياري لمساعدتنا في تحسين التجربة):</label>
+          <textarea name="Reason" rows="3" placeholder="اكتب سبب رغبتك في حذف الحساب..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">إرسال طلب حذف الحساب ✉️</button>
+      </form>
+    </div>
+
+    <h2>ثالثاً: تفاصيل البيانات التي يتم حذفها وفترات الاحتفاظ</h2>
+    <div class="card">
+      <table style="width: 100%; border-collapse: collapse; text-align: right;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--card-border);">
+            <th style="padding: 10px; color: #fff;">نوع البيانات</th>
+            <th style="padding: 10px; color: #fff;">الإجراء المتخذ</th>
+            <th style="padding: 10px; color: #fff;">مدة التنفيذ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--card-border);">
+            <td style="padding: 10px; color: var(--text-muted);">الملف الشخصي والاسم ورقم المعرف</td>
+            <td style="padding: 10px; color: #34D399;">حذف فوري ودائم</td>
+            <td style="padding: 10px; color: var(--accent-cyan);">فوري (خلال ثوانٍ)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--card-border);">
+            <td style="padding: 10px; color: var(--text-muted);">سجل حل القطع ودرجات التقييم (MMR)</td>
+            <td style="padding: 10px; color: #34D399;">حذف كامل وشامل</td>
+            <td style="padding: 10px; color: var(--accent-cyan);">فوري</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--card-border);">
+            <td style="padding: 10px; color: var(--text-muted);">قاموس الكلمات الصعبة (Weak Words)</td>
+            <td style="padding: 10px; color: #34D399;">حذف كامل وشامل</td>
+            <td style="padding: 10px; color: var(--accent-cyan);">فوري</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; color: var(--text-muted);">جلسات التوثيق المؤقتة (Sessions)</td>
+            <td style="padding: 10px; color: #34D399;">إبطال وحذف نهائي</td>
+            <td style="padding: 10px; color: var(--accent-cyan);">فوري</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="text-align: center; color: var(--text-dim); margin-top: 24px;">
+      لأي مساعدة مباشرة أو استفسار إضافي: <a href="mailto:support@qataly.app" style="color: var(--accent-cyan);">support@qataly.app</a>
+    </p>
+  </main>
+
+  <footer>
+    <p>© 2026 تطبيق قَطْعَلِي (Qata'ly). جميع الحقوق محفوظة — تطوير zed32 devs / abo wehidy</p>
+  </footer>
+
+</body>
+</html>

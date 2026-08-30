@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تراخيص المصادر المفتوحة — تطبيق قطعه (Qata'ly)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0E27;
+      --card-bg: #131B3E;
+      --card-border: #2A3875;
+      --accent-blue: #229ED9;
+      --accent-cyan: #38BDF8;
+      --accent-purple: #A855F7;
+      --text-main: #FFFFFF;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Cairo', 'Inter', -apple-system, sans-serif;
+      line-height: 1.8;
+      padding: 0 16px 60px;
+    }
+    header {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 0 24px;
+      text-align: center;
+      border-bottom: 2px solid var(--card-border);
+    }
+    .logo {
+      font-size: 38px;
+      font-weight: 900;
+      color: #fff;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .tagline {
+      color: var(--accent-cyan);
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      background: var(--card-bg);
+      transition: all 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: #fff;
+      border-color: var(--accent-purple);
+      background: rgba(168, 85, 247, 0.15);
+    }
+    main {
+      max-width: 860px;
+      margin: 32px auto 0;
+    }
+    .meta-badge {
+      display: inline-block;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #D8B4FE;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 800;
+      margin: 36px 0 14px;
+      color: var(--accent-cyan);
+      border-right: 4px solid var(--accent-purple);
+      padding-right: 12px;
+    }
+    p, li {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 14px;
+    }
+    .package-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .package-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .package-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .license-badge {
+      background: rgba(34, 158, 217, 0.2);
+      color: var(--accent-cyan);
+      border: 1px solid var(--accent-blue);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .license-text {
+      background: #090D24;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #94A3B8;
+      line-height: 1.6;
+      direction: ltr;
+      text-align: left;
+    }
+    footer {
+      max-width: 860px;
+      margin: 50px auto 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--card-border);
+      padding-top: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">قَطْعَلِي ⚡ (Qata'ly)</div>
+    <div class="tagline">تراخيص البرمجيات والمكتبات مفتوحة المصدر (Open Source Licenses)</div>
+    <nav class="nav-links">
+      <a href="index.html">الرئيسية</a>
+      <a href="privacy.html">سياسة الخصوصية</a>
+      <a href="terms.html">شروط الاستخدام</a>
+      <a href="delete-account.html">حذف الحساب والبيانات</a>
+      <a href="licenses.html" class="active">التراخيص المفتوحة</a>
+    </nav>
+  </header>
+
+  <main>
+    <span class="meta-badge">إقرارات حقوق ومصادر البرمجيات مفتوحة المصدر</span>
+    <h1>تراخيص البرمجيات (Software Licenses)</h1>
+
+    <p>
+      تم بناء وتطوير تطبيق <strong>«قطعه» (Qata'ly)</strong> بالاعتماد على إطار عمل <strong>Flutter</strong> ومجموعة من أفضل المكتبات مفتوحة المصدر لتقديم تجربة تعليمية فائقة السرعة والأداء. نحن نعرب عن خالص الامتنان لمجتمع المطورين والمساهمين في هذه المشروعات.
+    </p>
+
+    <h2>المكتبات والحزم المستخدمة</h2>
+
+    <div class="package-card">
+      <div class="package-header">
+        <span class="package-title">Flutter Framework & Dart SDK</span>
+        <span class="license-badge">BSD 3-Clause</span>
+      </div>
+      <p style="font-size: 13px; margin-bottom: 8px;">إطار العمل الأساسي لتطوير واجهات المستخدم الأصلية متعددة المنصات.</p>
+      <div class="license-text">
+        Copyright 2014 The Flutter Authors. All rights reserved.<br>
+        Redistribution and use in source and binary forms, with or without modification, are permitted provided that the conditions of the BSD 3-Clause License are met.
+      </div>
+    </div>
+
+    <div class="package-card">
+      <div class="package-header">
+        <span class="package-title">supabase_flutter (v2.16.0)</span>
+        <span class="license-badge">MIT License</span>
+      </div>
+      <p style="font-size: 13px; margin-bottom: 8px;">حزمة الاتصال السريع والآمن بخوادم وقواعد بيانات Supabase مع دعم Realtime و Auth.</p>
+      <div class="license-text">
+        Copyright (c) 2021 Supabase<br>
+        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction...
+      </div>
+    </div>
+
+    <div class="package-card">
+      <div class="package-header">
+        <span class="package-title">provider (v6.1.2)</span>
+        <span class="license-badge">MIT License</span>
+      </div>
+      <p style="font-size: 13px; margin-bottom: 8px;">مكتبة إدارة الحالة (State Management) وتنسيق تدفق البيانات بين الشاشات.</p>
+      <div class="license-text">
+        Copyright (c) 2019 Remi Rousselet<br>
+        Permission is hereby granted, free of charge, to any person obtaining a copy of this software.
+      </div>
+    </div>
+
+    <div class="package-card">
+      <div class="package-header">
+        <span class="package-title">google_fonts (v6.2.1)</span>
+        <span class="license-badge">Apache 2.0</span>
+      </div>
+      <p style="font-size: 13px; margin-bottom: 8px;">مكتبة تحميل وتنسيق الخطوط الطباعية (Cairo & Inter) لجمال الواجهات العربية.</p>
+      <div class="license-text">
+        Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+      </div>
+    </div>
+
+    <div class="package-card">
+      <div class="package-header">
+        <span class="package-title">url_launcher & webview_flutter</span>
+        <span class="license-badge">BSD 3-Clause</span>
+      </div>
+      <p style="font-size: 13px; margin-bottom: 8px;">مكتبات فتح الروابط الخارجية وعرض صفحات الويب والتوثيق الآمن عبر تيليجرام.</p>
+      <div class="license-text">
+        Copyright 2013 The Flutter Authors. All rights reserved.
+      </div>
+    </div>
+
+    <div class="package-card">
+      <div class="package-header">
+        <span class="package-title">crypto & http</span>
+        <span class="license-badge">BSD 3-Clause</span>
+      </div>
+      <p style="font-size: 13px; margin-bottom: 8px;">مكتبات تشفير HMAC-SHA256 والاتصال الآمن بـ REST APIs لخوادم الذكاء الاصطناعي.</p>
+      <div class="license-text">
+        Copyright 2015, the Dart project authors. All rights reserved.
+      </div>
+    </div>
+
+    <p style="text-align: center; color: var(--text-dim); margin-top: 30px;">
+      يمكن استعراض كافة التراخيص المفصلة من داخل التطبيق أيضاً عبر الضغط على «تراخيص التطبيق» في صفحة الإعدادات.
+    </p>
+  </main>
+
+  <footer>
+    <p>© 2026 تطبيق قَطْعَلِي (Qata'ly). جميع الحقوق محفوظة — تطوير zed32 devs / abo wehidy</p>
+  </footer>
+
+</body>
+</html>

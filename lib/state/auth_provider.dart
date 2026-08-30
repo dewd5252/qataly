@@ -200,4 +200,24 @@ class AuthProvider extends ChangeNotifier {
     _currentUser = null;
     notifyListeners();
   }
+
+  /// Permanently delete current user account and progress
+  Future<bool> deleteAccount() async {
+    if (_currentUser == null) return false;
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final uid = _currentUser!.id;
+      await SupabaseService.instance.deleteAccount(uid);
+      _currentUser = null;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = 'فشل في حذف الحساب: $e';
+      notifyListeners();
+      return false;
+    }
+  }
 }

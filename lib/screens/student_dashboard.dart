@@ -13,6 +13,7 @@ import 'package:qataly/widgets/brutalist_widgets.dart';
 import 'package:qataly/screens/challenge_screen.dart';
 import 'package:qataly/screens/onboarding_screen.dart';
 import 'package:qataly/screens/teacher_dashboard.dart';
+import 'package:qataly/screens/legal_screen.dart';
 import 'package:qataly/services/gemini_service.dart';
 
 class StudentDashboard extends StatefulWidget {
@@ -1489,7 +1490,30 @@ class _StudentDashboardState extends State<StudentDashboard> {
           ),
           const SizedBox(height: 24),
 
-          // Section 4: Logout Button
+          // Section 4: Legal, Privacy & Licenses
+          BrutalistButton(
+            backgroundColor: const Color(0xFF1E293B),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LegalScreen()),
+              );
+            },
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.privacy_tip_outlined, color: QatalyTheme.secondary),
+                SizedBox(width: 8),
+                Text(
+                  'الشروط والخصوصية وتراخيص التطبيق 🛡️',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Section 5: Logout Button
           BrutalistButton(
             backgroundColor: QatalyTheme.accent,
             onTap: () => auth.signOut(),
