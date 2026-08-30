@@ -20,11 +20,11 @@ class _LegalScreenState extends State<LegalScreen>
   bool _isDeleting = false;
 
   static const String _privacyUrl =
-      'https://qbnzxhiuoxfnxdbpozrx.supabase.co/functions/v1/legal/privacy';
+      'https://dewd5252.github.io/qataly/privacy.html';
   static const String _termsUrl =
-      'https://qbnzxhiuoxfnxdbpozrx.supabase.co/functions/v1/legal/terms';
+      'https://dewd5252.github.io/qataly/terms.html';
   static const String _deleteAccountUrl =
-      'https://qbnzxhiuoxfnxdbpozrx.supabase.co/functions/v1/legal/delete-account';
+      'https://dewd5252.github.io/qataly/delete-account.html';
 
   @override
   void initState() {
