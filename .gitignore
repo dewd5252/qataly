@@ -51,3 +51,7 @@ app.*.map.json
 
 # Node
 node_modules/
+
+# Release signing files - NEVER commit these
+android/app/upload-keystore.jks
+android/key.properties
