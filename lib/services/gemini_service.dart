@@ -2,37 +2,28 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:qataly/config/secrets.dart';
 
-/// Multi-Provider AI Service powering Qata'ly:
-/// Combines Groq LPU (llama-3.3-70b-versatile) and Gemini 3.5 Flash
-/// with Round-Robin Rotation and automatic Failover Fallback.
+/// Gemini AI Service with Multi-Key Rotation and Supabase Edge Function Proxy.
+/// Strictly uses `gemini-2.5-flash-lite` (with fallback to `gemini-3.5-flash-lite`).
+/// All API keys are stored in git-ignored configuration to prevent any GitHub leaks.
 class GeminiService {
   static final GeminiService instance = GeminiService._();
   GeminiService._();
 
-  // Groq LPU Provider Details
-  static const String _groqApiKey =
-      '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';
-  static const List<String> _groqModels = [
-    'openai/gpt-oss-120b',
-    'qwen/qwen3.6-27b',
-    'groq/compound',
-  ];
-  static const String _groqUrl =
-      'https://api.groq.com/openai/v1/chat/completions';
-
-  // Google AI Studio Gemini Provider Details (gemini-2.5-flash-lite and gemini-3.6-flash ONLY)
-  static const String _geminiApiKey =
-      'AIzaSyCwi0GzVmyyk5Le3RIElIoCVHBH_z3HSJ4';
+  // Exclusively Gemini 3.5 Flash Lite
   static const List<String> _geminiModels = [
-    'gemini-2.5-flash-lite',
-    'gemini-3.6-flash',
+    'gemini-3.5-flash-lite',
   ];
+
   static const String _geminiBaseUrl =
       'https://generativelanguage.googleapis.com/v1beta/models';
 
   final Random _random = Random();
-  int _providerCounter = 0;
+  int _currentKeyIndex = 0;
+
+  List<String> get _keys => AppSecrets.geminiApiKeys;
 
   final List<String> _topics = [
     'Space Exploration and Mars Missions',
@@ -46,79 +37,37 @@ class GeminiService {
   ];
 
   // ─────────────────────────────────────────────────────────────
-  // Core Generation with Provider Rotation & Fallback
+  // Core AI Generation with Edge Function + Rotating Key Fallback
   // ─────────────────────────────────────────────────────────────
 
   Future<String> _generate(String prompt, {bool jsonMode = false}) async {
-    _providerCounter++;
-    final useGroqFirst = (_providerCounter % 2 == 1);
+    // 1. Try Supabase Edge Function (server-side proxy) first if client is initialized
+    try {
+      final supabase = Supabase.instance.client;
+      final response = await supabase.functions.invoke(
+        'qataly-ai',
+        body: {
+          'action': jsonMode ? 'raw_json' : 'raw_text',
+          'payload': {'prompt': prompt, 'json_mode': jsonMode},
+        },
+      ).timeout(const Duration(seconds: 15));
 
-    if (useGroqFirst) {
-      try {
-        return await _generateGroq(prompt, jsonMode: jsonMode);
-      } catch (e) {
-        debugPrint('Groq LPU failed ($e), falling back to Gemini models...');
-        return await _generateGemini(prompt, jsonMode: jsonMode);
+      if (response.status == 200 && response.data != null) {
+        if (response.data is Map && response.data['result'] != null) {
+          return response.data['result'] as String;
+        }
       }
-    } else {
-      try {
-        return await _generateGemini(prompt, jsonMode: jsonMode);
-      } catch (e) {
-        debugPrint('Gemini models failed ($e), falling back to Groq LPU...');
-        return await _generateGroq(prompt, jsonMode: jsonMode);
-      }
+    } catch (_) {
+      // Edge function not yet deployed or unreachable, fall back to direct rotation
     }
+
+    // 2. Direct Gemini rotation across the 3 keys
+    return await _generateDirectGemini(prompt, jsonMode: jsonMode);
   }
 
-  /// 1. Groq LPU Generator with internal model fallback
-  Future<String> _generateGroq(String prompt, {bool jsonMode = false}) async {
-    final uri = Uri.parse(_groqUrl);
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $_groqApiKey',
-    };
-
-    dynamic lastError;
-    for (final model in _groqModels) {
-      try {
-        final Map<String, dynamic> bodyMap = {
-          'model': model,
-          'messages': [
-            {'role': 'user', 'content': prompt}
-          ],
-          'temperature': 0.7,
-          'max_tokens': 3072,
-        };
-
-        if (jsonMode) {
-          bodyMap['response_format'] = {'type': 'json_object'};
-        }
-
-        final response = await http
-            .post(uri, headers: headers, body: jsonEncode(bodyMap))
-            .timeout(const Duration(seconds: 20));
-
-        if (response.statusCode != 200) {
-          throw Exception('Groq API [$model] Error ${response.statusCode}: ${response.body}');
-        }
-
-        final json = jsonDecode(response.body) as Map<String, dynamic>;
-        final choices = json['choices'] as List<dynamic>?;
-        if (choices == null || choices.isEmpty) {
-          throw Exception('لا توجد استجابة من Groq LPU ($model)');
-        }
-        final message = choices[0]['message'] as Map<String, dynamic>;
-        return (message['content'] as String).trim();
-      } catch (e) {
-        lastError = e;
-        debugPrint('Groq model $model failed, trying next...');
-      }
-    }
-    throw Exception('All Groq models failed. Last error: $lastError');
-  }
-
-  /// 2. Gemini Generator with dynamic fallback between gemini-2.5-flash-lite and gemini-3.6-flash ONLY
-  Future<String> _generateGemini(String prompt, {bool jsonMode = false}) async {
+  /// Direct Gemini API caller with round-robin rotation across the 3 keys
+  /// and model fallback between gemini-2.5-flash-lite and gemini-3.5-flash-lite.
+  Future<String> _generateDirectGemini(String prompt, {bool jsonMode = false}) async {
     final Map<String, dynamic> genConfig = {
       'temperature': 0.7,
       'maxOutputTokens': 3072,
@@ -139,38 +88,82 @@ class GeminiService {
       'generationConfig': genConfig
     });
 
+    final keys = _keys;
+    if (keys.isEmpty) {
+      throw Exception('لا توجد مفاتيح API مهيأة للذكاء الاصطناعي.');
+    }
+
     dynamic lastError;
-    for (final model in _geminiModels) {
-      try {
-        final uri = Uri.parse('$_geminiBaseUrl/$model:generateContent?key=$_geminiApiKey');
-        final response = await http
-            .post(uri, headers: {'Content-Type': 'application/json'}, body: body)
-            .timeout(const Duration(seconds: 25));
 
-        if (response.statusCode != 200) {
-          throw Exception('Gemini API [$model] Error ${response.statusCode}: ${response.body}');
-        }
+    // Try rotating through keys
+    for (int i = 0; i < keys.length; i++) {
+      final key = keys[(_currentKeyIndex + i) % keys.length];
 
-        final json = jsonDecode(response.body) as Map<String, dynamic>;
-        final candidates = json['candidates'] as List<dynamic>?;
-        if (candidates == null || candidates.isEmpty) {
-          throw Exception('لا توجد استجابة من Gemini ($model)');
+      for (final model in _geminiModels) {
+        try {
+          final uri = Uri.parse('$_geminiBaseUrl/$model:generateContent?key=$key');
+          final response = await http
+              .post(uri, headers: {'Content-Type': 'application/json'}, body: body)
+              .timeout(const Duration(seconds: 25));
+
+          if (response.statusCode != 200) {
+            lastError = '[$model] ${response.statusCode}: ${response.body}';
+            debugPrint('Gemini key/model failed ($lastError), trying next...');
+            continue;
+          }
+
+          final json = jsonDecode(response.body) as Map<String, dynamic>;
+          final candidates = json['candidates'] as List<dynamic>?;
+          if (candidates == null || candidates.isEmpty) {
+            continue;
+          }
+          final content = candidates[0]['content'] as Map<String, dynamic>;
+          final parts = content['parts'] as List<dynamic>;
+          final text = (parts[0]['text'] as String).trim();
+
+          if (text.isNotEmpty) {
+            // Successfully generated — advance rotation counter for next invocation
+            _currentKeyIndex = (_currentKeyIndex + i + 1) % keys.length;
+            return text;
+          }
+        } catch (e) {
+          lastError = e;
+          debugPrint('Gemini error with key/model: $e');
         }
-        final content = candidates[0]['content'] as Map<String, dynamic>;
-        final parts = content['parts'] as List<dynamic>;
-        return (parts[0]['text'] as String).trim();
-      } catch (e) {
-        lastError = e;
-        debugPrint('Gemini model $model failed, trying fallback model...');
       }
     }
-    throw Exception('All Gemini models failed. Last error: $lastError');
+
+    throw Exception('تعذر الاتصال بخدمة الذكاء الاصطناعي. يرجى المحاولة مرة أخرى.');
   }
 
   // ─────────────────────────────────────────────────────────────
   // 1. Translate / explain a word in Egyptian colloquial Arabic
   // ─────────────────────────────────────────────────────────────
   Future<String> translateWord(String word, {String? passageContext}) async {
+    // Try Edge Function first
+    try {
+      final supabase = Supabase.instance.client;
+      final response = await supabase.functions.invoke(
+        'qataly-ai',
+        body: {
+          'action': 'translate_word',
+          'payload': {
+            'word': word,
+            'passage_context': passageContext,
+          },
+        },
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.status == 200 && response.data != null) {
+        final data = response.data;
+        if (data is Map && data['result'] != null) {
+          return data['result'] as String;
+        }
+      }
+    } catch (_) {
+      // Fall through to direct generation
+    }
+
     final contextHint = passageContext != null
         ? '\nسياق الاستخدام في الجملة: "$passageContext"'
         : '';
@@ -196,6 +189,32 @@ class GeminiService {
     int numQuestions = 6,
   }) async {
     final selectedTopic = topic ?? _topics[_random.nextInt(_topics.length)];
+
+    // Try Edge Function first
+    try {
+      final supabase = Supabase.instance.client;
+      final response = await supabase.functions.invoke(
+        'qataly-ai',
+        body: {
+          'action': 'generate_passage',
+          'payload': {
+            'difficulty_level': difficultyLevel,
+            'topic': selectedTopic,
+            'num_questions': numQuestions,
+          },
+        },
+      ).timeout(const Duration(seconds: 25));
+
+      if (response.status == 200 && response.data != null) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['passage_text'] != null) {
+          data['difficulty_level'] = difficultyLevel;
+          return data;
+        }
+      }
+    } catch (_) {
+      // Fall through to direct generation
+    }
 
     final levelDesc = {
       1: 'very simple (elementary vocabulary, short sentences)',
@@ -265,6 +284,27 @@ JSON Schema:
   // 3. AI Essay / Journal Grammar Correction
   // ─────────────────────────────────────────────────────────────
   Future<Map<String, dynamic>> correctJournalEssay(String text) async {
+    // Try Edge Function first
+    try {
+      final supabase = Supabase.instance.client;
+      final response = await supabase.functions.invoke(
+        'qataly-ai',
+        body: {
+          'action': 'correct_essay',
+          'payload': {'text': text},
+        },
+      ).timeout(const Duration(seconds: 25));
+
+      if (response.status == 200 && response.data != null) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['corrected'] != null) {
+          return data;
+        }
+      }
+    } catch (_) {
+      // Fall through to direct generation
+    }
+
     final prompt = '''
 You are an expert Egyptian English teacher reviewing a student's daily English journal/essay.
 Analyze the following text written by a student:
