@@ -207,9 +207,10 @@ class GeminiService {
 
       if (response.status == 200 && response.data != null) {
         final data = response.data;
-        if (data is Map<String, dynamic> && data['passage_text'] != null) {
-          data['difficulty_level'] = difficultyLevel;
-          return data;
+        if (data is Map && data['passage_text'] != null) {
+          final map = Map<String, dynamic>.from(data);
+          map['difficulty_level'] = difficultyLevel;
+          return map;
         }
       }
     } catch (_) {
@@ -297,8 +298,8 @@ JSON Schema:
 
       if (response.status == 200 && response.data != null) {
         final data = response.data;
-        if (data is Map<String, dynamic> && data['corrected'] != null) {
-          return data;
+        if (data is Map && data['corrected'] != null) {
+          return Map<String, dynamic>.from(data);
         }
       }
     } catch (_) {
