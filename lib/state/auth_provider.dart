@@ -8,16 +8,22 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  AuthProvider() {
-    _initSession();
+  AuthProvider({bool autoInit = true}) {
+    if (autoInit) {
+      _initSession();
+    }
   }
 
   Future<void> _initSession() async {
-    // Wait for Supabase to restore the persisted session from disk
-    await SupabaseService.instance.initialSession;
-    final user = SupabaseService.instance.currentAuthUser;
-    if (user != null) {
-      await restoreSession(user.id);
+    try {
+      // Wait for Supabase to restore the persisted session from disk
+      await SupabaseService.instance.initialSession;
+      final user = SupabaseService.instance.currentAuthUser;
+      if (user != null) {
+        await restoreSession(user.id);
+      }
+    } catch (_) {
+      // Supabase uninitialized or offline
     }
   }
 
@@ -46,37 +52,54 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    try {
-      final userId = await SupabaseService.instance.signIn(email, password);
-      _currentUser = await SupabaseService.instance.getProfile(userId);
+    final cleanEmail = email.trim().toLowerCase();
+
+    // ── Dedicated Google Play Reviewer & Demo Access ──
+    if (cleanEmail == 'demo@qataly.app') {
+      if (password != 'Qataly@2026') {
+        _errorMessage = 'كلمة المرور غير صحيحة للحساب التجريبي.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      try {
+        final userId = await SupabaseService.instance.signIn(cleanEmail, password);
+        _currentUser = await SupabaseService.instance.getProfile(userId);
+      } catch (_) {
+        // Deterministic fallback for Google Play Reviewer demo session
+        _currentUser = Profile(
+          id: 'demo-google-reviewer',
+          fullName: 'حساب مراجعة متجر جوجل',
+          classroomId: null,
+          mmr: 1200,
+          dailyStreak: 5,
+          lastActiveDate: DateTime.now().toIso8601String().substring(0, 10),
+          isPremium: true,
+          premiumUntil: DateTime.now().add(const Duration(days: 365)),
+          createdAt: DateTime.now(),
+        );
+      }
       _isLoading = false;
       notifyListeners();
       return true;
-    } catch (e) {
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
-      _isLoading = false;
-      notifyListeners();
-      return false;
     }
+
+    // ── Standard users must use Telegram login ──
+    _errorMessage =
+        'التسجيل بالبريد معلّق حالياً للطلاب. يرجى تسجيل الدخول السريع بنقرة واحدة عبر تليجرام ⚡';
+    _isLoading = false;
+    notifyListeners();
+    return false;
   }
 
   Future<bool> register(String email, String password, String fullName) async {
     _isLoading = true;
-    _errorMessage = null;
+    _errorMessage =
+        'إنشاء حساب جديد بالبريد معلّق حالياً. يرجى استخدام تسجيل الدخول الفوري عبر تليجرام ⚡';
+    _isLoading = false;
     notifyListeners();
-
-    try {
-      final userId = await SupabaseService.instance.signUp(email, password, fullName);
-      _currentUser = await SupabaseService.instance.getProfile(userId);
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
+    return false;
   }
 
   /// Login or auto-register via Telegram OAuth data.
@@ -219,5 +242,11 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  @visibleForTesting
+  void setCurrentUserForTesting(Profile profile) {
+    _currentUser = profile;
+    notifyListeners();
   }
 }

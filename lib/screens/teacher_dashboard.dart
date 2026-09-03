@@ -326,7 +326,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                     ),
                     const SizedBox(height: 12),
                     const Text(
-                      'سيقوم نموذج Gemini 2.5 Flash Lite بتوليد قطعة قراءة جديدة تماماً مع الأسئلة والخيارات والأسئلة والشروحات بالعامية المصرية وتخزينها في Supabase مباشرة:',
+                      'سيتم إنشاء قطعة قراءة جديدة تماماً مع الأسئلة والخيارات والشروحات وتخزينها في قاعدة البيانات مباشرة:',
                       style: TextStyle(fontSize: 12, color: Colors.white70, height: 1.4),
                     ),
                     const SizedBox(height: 16),
@@ -374,7 +374,7 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                           CircularProgressIndicator(color: QatalyTheme.primary),
                           SizedBox(height: 12),
                           Text(
-                            'Gemini يقوم بصياغة القطعة والأسئلة والترجمة...',
+                            'جاري إعداد وصياغة القطعة والأسئلة والترجمة...',
                             style: TextStyle(color: QatalyTheme.secondary, fontSize: 12, fontWeight: FontWeight.bold),
                           ),
                         ],

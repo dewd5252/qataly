@@ -12,14 +12,24 @@ class SupabaseService {
   static final SupabaseService instance = SupabaseService._();
   SupabaseService._();
 
+  bool get isInitialized {
+    try {
+      Supabase.instance;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   SupabaseClient get _db => Supabase.instance.client;
 
-  User? get currentAuthUser => _db.auth.currentUser;
+  User? get currentAuthUser => isInitialized ? _db.auth.currentUser : null;
 
   /// Completes once Supabase has restored the persisted session from disk.
   /// gotrue 2.x emits an `initialSession` auth event when restoration
   /// finishes (with a null session when none was stored).
   Future<Session?> get initialSession async {
+    if (!isInitialized) return null;
     final current = _db.auth.currentSession;
     if (current != null) return current;
 

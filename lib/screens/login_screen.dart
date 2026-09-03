@@ -235,6 +235,214 @@ class _LoginScreenState extends State<LoginScreen>
     }
   }
 
+  void _showEmailLoginDialog() {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    bool isSubmitting = false;
+    String? localError;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF131B3E),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Color(0xFF38BDF8), width: 2),
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'دخول المراجعين / التجريبي',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white70, size: 20),
+                  onPressed: () => Navigator.pop(dialogCtx),
+                ),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0A0E27),
+                      border: Border.all(color: const Color(0xFF2A3875)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      '🔒 هذا القسم مخصص لمراجعي متجر التطبيقات (Google Play Reviewers) أو الحساب التجريبي الرسمي.',
+                      style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                  if (localError != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      margin: const EdgeInsets.only(bottom: 14),
+                      decoration: BoxDecoration(
+                        color: QatalyTheme.accent.withValues(alpha: 0.15),
+                        border: Border.all(color: QatalyTheme.accent),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            localError!,
+                            style: const TextStyle(
+                              color: QatalyTheme.accent,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF229ED9),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            ),
+                            icon: const Icon(Icons.send_rounded, color: Colors.white, size: 16),
+                            label: const Text(
+                              'الدخول عبر تليجرام الآن ⚡',
+                              style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(dialogCtx);
+                              _startTelegramLogin();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: InputDecoration(
+                      hintText: 'البريد (demo@qataly.app)',
+                      hintStyle: const TextStyle(color: Colors.white38, fontSize: 12),
+                      prefixIcon: const Icon(Icons.email_outlined, color: Colors.white54, size: 20),
+                      filled: true,
+                      fillColor: Colors.black26,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: InputDecoration(
+                      hintText: 'كلمة المرور',
+                      hintStyle: const TextStyle(color: Colors.white38, fontSize: 12),
+                      prefixIcon: const Icon(Icons.lock_outline, color: Colors.white54, size: 20),
+                      filled: true,
+                      fillColor: Colors.black26,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Fill demo credentials shortcut
+                  InkWell(
+                    onTap: () {
+                      setDialogState(() {
+                        emailController.text = 'demo@qataly.app';
+                        passwordController.text = 'Qataly@2026';
+                        localError = null;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF229ED9).withValues(alpha: 0.1),
+                        border: Border.all(color: const Color(0xFF229ED9).withValues(alpha: 0.3)),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.auto_fix_high, color: Color(0xFF38BDF8), size: 16),
+                          SizedBox(width: 6),
+                          Text(
+                            'ملء بيانات حساب المراجعة تلقائياً 🤖',
+                            style: TextStyle(color: Color(0xFF38BDF8), fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  if (isSubmitting)
+                    const Center(child: CircularProgressIndicator(color: Color(0xFF38BDF8)))
+                  else
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF229ED9),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () async {
+                        final email = emailController.text.trim();
+                        final pass = passwordController.text.trim();
+                        if (email.isEmpty || pass.isEmpty) {
+                          setDialogState(() => localError = 'يرجى إدخال البريد وكلمة المرور');
+                          return;
+                        }
+                        setDialogState(() {
+                          isSubmitting = true;
+                          localError = null;
+                        });
+
+                        final auth = Provider.of<AuthProvider>(context, listen: false);
+                        final nav = Navigator.of(context);
+                        final dialogNav = Navigator.of(dialogCtx);
+                        final ok = await auth.login(email, pass);
+
+                        if (!mounted) return;
+
+                        if (ok) {
+                          dialogNav.pop();
+                          nav.pushReplacement(
+                            MaterialPageRoute(builder: (_) => const StudentDashboard()),
+                          );
+                        } else {
+                          setDialogState(() {
+                            isSubmitting = false;
+                            localError = auth.errorMessage ?? 'فشل تسجيل الدخول.';
+                          });
+                        }
+                      },
+                      child: const Text(
+                        'تسجيل الدخول',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -359,8 +567,27 @@ class _LoginScreenState extends State<LoginScreen>
                     ],
                   ),
                 )
-              else
+              else ...[
                 _TelegramLoginButton(onPressed: _startTelegramLogin),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Color(0xFF2A3875), width: 1.5),
+                    backgroundColor: const Color(0xFF131B3E),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  icon: const Icon(Icons.email_outlined, color: Color(0xFF38BDF8), size: 20),
+                  label: const Text(
+                    'تسجيل الدخول بالبريد الإلكتروني / تجريبي',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: _showEmailLoginDialog,
+                ),
+              ],
 
               const SizedBox(height: 16),
               Center(

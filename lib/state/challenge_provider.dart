@@ -226,4 +226,12 @@ class ChallengeProvider extends ChangeNotifier {
       'mmr_gain': mmrGain,
     };
   }
+
+  @visibleForTesting
+  void setPassageForTesting(Passage passage) {
+    _currentPassage = passage;
+    _currentQuestionIndex = 0;
+    _selectedAnswers.clear();
+    notifyListeners();
+  }
 }

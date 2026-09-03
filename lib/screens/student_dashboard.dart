@@ -542,8 +542,8 @@ class _StudentDashboardState extends State<StudentDashboard> {
                           CircularProgressIndicator(color: QatalyTheme.secondary),
                           SizedBox(height: 12),
                           Text(
-                            'جاري توليد قطعة و 6 أسئلة بالذكاء الاصطناعي لمستواك (Gemini 3.5 Flash)... 🤖',
-                            style: TextStyle(color: QatalyTheme.secondary, fontSize: 12, fontWeight: FontWeight.bold),
+                            'جاري تحضير القطعة والأسئلة لمستواك... ⏳',
+                            style: TextStyle(color: QatalyTheme.secondary, fontSize: 13, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -1443,24 +1443,24 @@ class _StudentDashboardState extends State<StudentDashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  '🎫 تفعيل كارت بريميوم (VIP Code):',
+                  '🎫 تفعيل كود الوصول التعليمي:',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 6),
                 const Text(
-                  'أدخل كود تفعيل الكارت (مثل: VIP-30DAYS أو FREE-WEEK):',
+                  'أدخل كود التفعيل المقدم من معلمك أو سنترك التعليمي:',
                   style: TextStyle(color: Colors.white60, fontSize: 12),
                 ),
                 const SizedBox(height: 12),
                 BrutalistInput(
                   controller: _codeController,
-                  hintText: 'كود التفعيل (مثل: VIP-30DAYS)',
+                  hintText: 'كود التفعيل (مثل: EDU-2026)',
                 ),
                 const SizedBox(height: 12),
                 BrutalistButton(
                   backgroundColor: QatalyTheme.primary,
                   onTap: _claimCode,
-                  child: const Text('شحن وتفعيل الكارت ⚡', style: TextStyle(color: Colors.white)),
+                  child: const Text('تفعيل الكود ⚡', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
